@@ -1,38 +1,49 @@
 check-program = $(foreach exec,$(1),$(if $(shell PATH="$(PATH)" which $(exec)),,$(error "Missing deps: no '$(exec)' in PATH")))
 
-node_modules: package.json package-lock.json
-	$(call check-program, npm)
-	(npm install && touch $@) || true
-.PHONY: node_modules
+# Generate API from protofiles
+generate: api.generate
 
-ios: node_modules # Run the iOS app
-	npx expo run:ios
-.PHONY: ios
+# Clean and generate
+regenerate: api.clean api.generate
 
-ios.release: node_modules # Run the iOS app in release mode
-	npx expo run:ios --configuration Release
-.PHONY: ios.release
+.PHONY: generate regenerate
 
-android: node_modules # Run the Android app
-	npx expo run:android
-.PHONY: android
+# - API : Handle API generation and cleaning
 
-android.reverse:
-	$(call check-program, adb)
-	$(if $(ANDROID_DEVICE),,$(eval ANDROID_DEVICE = $(shell adb devices | tail +2 | head -1 | cut -f 1)))
-	@if [ -z "$(ANDROID_DEVICE)" ]; then \
-	  >&2 echo "ERROR: no Android device found"; exit 1; \
-	fi
-	adb -s $(ANDROID_DEVICE) reverse tcp:8081 tcp:8081 # metro
-	adb -s $(ANDROID_DEVICE) reverse tcp:26657 tcp:26657 # gnodev
-	adb -s $(ANDROID_DEVICE) reverse tcp:5050 tcp:5050 # faucet
-	adb -s $(ANDROID_DEVICE) reverse tcp:8546 tcp:8546 # tx-indexer
-	adb -s $(ANDROID_DEVICE) reverse tcp:26660 tcp:26660 # indexer
-.PHONY: android.reverse
+api.generate: _api.generate.protocol _api.generate.modules
+api.clean: _api.clean.protocol _api.clean.modules
 
-start: node_modules
-	npm run start
-.PHONY: start
+# - API - rpc
+
+protos_src := $(wildcard service/rpc/*.proto)
+gen_src := $(protos_src) Makefile buf.gen.yaml $(wildcard service/gnokeymobiletypes/*.go)
+gen_sum := gen.sum
+
+_api.generate.protocol: $(gen_sum)
+_api.clean.protocol:
+	rm -f api/gen/go/*.pb.go
+	rm -f api/gen/go/_goconnect/*.connect.go
+	rm -f api/gen/es/*.{ts,js}
+	rm -f $(gen_sum)
+
+$(gen_sum): $(gen_src)
+	$(call check-program, shasum buf)
+	@shasum $(gen_src) | sort -k 2 > $(gen_sum).tmp
+	@diff -q $(gen_sum).tmp $(gen_sum) || ( \
+		buf generate api; \
+		shasum $(gen_src) | sort -k 2 > $(gen_sum).tmp; \
+		mv $(gen_sum).tmp $(gen_sum); \
+		go mod tidy \
+	)
+
+_api.generate.modules:
+	$(call check-program, yarn)
+	cd api; yarn
+
+_api.clean.modules:
+	cd api; rm -fr node_modules
+
+.PHONY: api.generate _api.generate.protocol _api.generate.modules _api.clean.protocol _api.clean.modules
 
 # - asdf
 
@@ -48,43 +59,3 @@ asdf.install_tools: asdf.add_plugins
 	$(call check-program, asdf)
 	@echo "Installing asdf tools..."
 	@asdf install
-
-clean:
-	$(call check-program, npm)
-
-	# React-Native cmd
-	npm cache clean --force
-
-# React-Native files
-	rm -rf .tmp
-	rm -rf node_modules
-	rm -rf /tmp/react-native-packager-cache-*
-	rm -rf /tmp/metro-bundler-cache-*
-	rm -rf .eslintcache
-
-	# Android files
-	rm -rf android
-
-	# iOS files
-	rm -rf ios
-
-.PHONY: clean
-
-clean_install: clean node_modules
-	cd ios && pod install
-.PHONY: clean_install
-
-release.ios: node_modules
-	npm run build
-	eas build --platform ios --profile production
-.PHONY: release.ios
-
-release.android: node_modules
-	eas build --platform android --profile production
-.PHONY: elease.android
-
-help:
-	@echo "Available make commands:"
-	@cat Makefile | grep '^[a-z]' | grep -v '=' | cut -d: -f1 | sort | sed 's/^/  /'
-.PHONY: help
-
