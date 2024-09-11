@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "gnokey",
-    "slug": "gnokey",
+    "name": "keymanager",
+    "slug": "keymanager",
     "platforms": [
       "ios",
       "android"
@@ -21,7 +21,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "land.gno.gnokey.ios",
+      "bundleIdentifier": "land.gno.keymanager.ios",
       "infoPlist": {
         "CFBundleAllowMixedLocalizations": true,
         "NSAppTransportSecurity": {
@@ -43,7 +43,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "land.gno.gnokey.android",
+      "package": "land.gno.keymanager.android",
       "versionCode": "1"
     },
     "web": {
@@ -67,7 +67,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "6d4190fa-0fdc-49e1-b9ca-32c1f33e21f3"
+        "projectId": "69645856-fdc6-4fea-8e7f-8c2e74f680b0"
       }
     },
     "owner": "bertytechnologies"

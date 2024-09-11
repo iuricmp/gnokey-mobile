@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
-import { useNavigation, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { Layout } from "@/components/index";
 import Text from "@/components/text";
 import { getInitialState, selectInitialized, selectMasterPassword, signIn, signUp, useAppDispatch, useAppSelector } from "@/redux";
@@ -13,7 +13,6 @@ export default function Root() {
 
   const [error, setError] = useState<string | undefined>(undefined);
 
-  const navigation = useNavigation();
   const dispatch = useAppDispatch();
 
   const appVersion = Application.nativeApplicationVersion;
@@ -59,8 +58,8 @@ export default function Root() {
       <Layout.Container>
         <Layout.BodyAlignedBotton>
           <View style={{ alignItems: "center" }}>
-            <Text.Title>gnoKey Mobile</Text.Title>
-            <Text.Body>Key Management Tool</Text.Body>
+            <Text.Title>Key Manager</Text.Title>
+            <Text.Body>Key Management Tool for Gno.land</Text.Body>
             <Text.Caption1>v{appVersion}</Text.Caption1>
           </View>
 
