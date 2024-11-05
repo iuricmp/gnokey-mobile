@@ -48,6 +48,11 @@ export default function Page() {
         router.push("/home")
     }
 
+    const onCancel = () => {
+        // callback to requester
+        Linking.openURL(`${callback}?status=cancelled`);
+    }
+
     return (
         <>
             <Layout.Container>
@@ -66,7 +71,7 @@ export default function Page() {
                     <Spacer space={16} />
 
                     <Button.TouchableOpacity title="Approve" variant="primary" onPress={signTxAndReturnToRequester}></Button.TouchableOpacity>
-                    <Button.TouchableOpacity title="Cancel" variant="primary-red" onPress={() => router.push("/home")}></Button.TouchableOpacity>
+                    <Button.TouchableOpacity title="Cancel" variant="primary-red" onPress={onCancel}></Button.TouchableOpacity>
                 </Layout.BodyAlignedBotton>
             </Layout.Container>
         </>
