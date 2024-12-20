@@ -43,5 +43,6 @@ export type NetworkMetainfo = {
   chainName: string;
   gnoAddress: string;
   faucetAddress?: string;
+  hasCaptcha?: boolean;
 };
 

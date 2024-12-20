@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView, TextInput as RNTextInput, Alert as RNAlert } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TextInput as RNTextInput, Alert as RNAlert, Modal } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { router, useNavigation } from "expo-router";
 import { useGnoNativeContext } from "@gnolang/gnonative";
@@ -14,16 +14,19 @@ import {
   selectKeyName,
   setKeyName,
   selectPhrase,
+  selectSelectedChain,
 } from "@/redux";
 import { ProgressViewModal, ChainSelectView } from "@/views";
-import { TextCopy, Layout, Alert, Spacer, Button, TextInput } from "@/components";
+import { TextCopy, Layout, Alert, Spacer, Button, TextInput, ModalHeader, ModalContent } from "@/components";
 import { Octicons } from "@expo/vector-icons";
 import { colors } from "@/assets";
+import { WebView, WebViewMessageEvent } from 'react-native-webview';
 
 export default function Page() {
 
   const [error, setError] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const inputRef = useRef<RNTextInput>(null);
 
@@ -38,6 +41,8 @@ export default function Page() {
   const existingAccount = useAppSelector(existingAccountSelector);
   const keyName = useAppSelector(selectKeyName);
   const phrase = useAppSelector(selectPhrase);
+  const currentNetwork = useAppSelector(selectSelectedChain)
+
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", async () => {
@@ -91,7 +96,7 @@ export default function Page() {
     })();
   }, [signUpState, newAccount]);
 
-  const onCreate = async () => {
+  const onCreate = async (catpchaToken: string | undefined = undefined) => {
     setError(undefined);
     if (!keyName) {
       setError("Please fill out all fields");
@@ -114,16 +119,21 @@ export default function Page() {
       return;
     }
 
+    if (currentNetwork?.hasCaptcha && !catpchaToken) {
+      setModalVisible(true);
+      return
+    }
+
     if (signUpState === SignUpState.user_exists_only_on_local_storage && existingAccount) {
       await gnonative.activateAccount(keyName);
       await gnonative.setPassword(masterPassword, existingAccount.address);
-      await dispatch(onboarding({ account: existingAccount })).unwrap();
+      await dispatch(onboarding({ account: existingAccount, captcha: catpchaToken })).unwrap();
       return;
     }
 
     try {
       setLoading(true);
-      await dispatch(signUp({ name: keyName, password: masterPassword, phrase })).unwrap();
+      await dispatch(signUp({ name: keyName, password: masterPassword, phrase, captcha: catpchaToken })).unwrap();
     } catch (error) {
       RNAlert.alert("Error", "" + error);
       setError("" + error);
@@ -138,6 +148,14 @@ export default function Page() {
     dispatch(initSignUpState());
     router.back()
   }
+
+  const handleMessage = (event: WebViewMessageEvent) => {
+    // Capture the token from the WebView
+    const { data } = event.nativeEvent;
+    console.log('Recaptcha token received:', data);
+    setModalVisible(false); // Update the token in state
+    onCreate(data); // Call the onCreate function with the token
+  };
 
   return (
     <Layout.Container>
@@ -169,19 +187,41 @@ export default function Page() {
               <ChainSelectView />
               <Alert severity="error" message={error} />
               <Spacer />
-              <Button.TouchableOpacity title="Create" onPress={onCreate} variant="primary" loading={loading} />
+              <Button.TouchableOpacity title="Create" onPress={() => onCreate()} variant="primary" loading={loading} />
               <Spacer space={8} />
               <Button.TouchableOpacity title="Back" onPress={onBack} variant="secondary" disabled={loading} />
+              <Modal visible={modalVisible} style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'black'
+              }}>
+                <View style={{ flex: 1, height: '100%', paddingTop: 100 }}>
+                  <ModalHeader title="Recaptcha" onClose={() => setModalVisible(false)} />
+                  <WebView source={{ uri: 'https://fantastic-barnacle-jvxv645773j7vj-5173.app.github.dev/?chain_id=dev' }} style={{ minHeight: 500 }}
+                    javaScriptEnabled
+                    domStorageEnabled
+                    automaticallyAdjustContentInsets
+                    onMessage={handleMessage} // Handle messages from WebView
+                  />
+                </View>
+              </Modal>
             </View>
           </View>
         </ScrollView>
         <ProgressViewModal />
-      </Layout.Body>
+      </Layout.Body >
     </Layout.Container >
   );
 }
 
 const styles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+    backgroundColor: "#0008",
+  },
   container: {
     flex: 1,
     alignItems: "center",

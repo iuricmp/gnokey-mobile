@@ -33,7 +33,7 @@ export default function Page() {
 
         const response = await gnonative.listKeyInfo();
         setAccounts(response);
-        dispatch(checkForKeyOnChains())
+        // dispatch(checkForKeyOnChains())
       } catch (error: unknown | Error) {
         console.error(error);
       } finally {

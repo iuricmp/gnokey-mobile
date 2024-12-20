@@ -46,6 +46,7 @@ interface SignUpParam {
   name: string;
   password: string;
   phrase: string;
+  captcha?: string;
 }
 
 type SignUpResponse = { newAccount?: KeyInfo, existingAccount?: KeyInfo, state: SignUpState };
@@ -67,7 +68,7 @@ type SignUpResponse = { newAccount?: KeyInfo, existingAccount?: KeyInfo, state: 
  */
 export const signUp = createAsyncThunk<SignUpResponse, SignUpParam, ThunkExtra>("user/signUp", async (param, thunkAPI) => {
 
-  const { name, password, phrase } = param;
+  const { name, password, phrase, captcha } = param;
   const { registerAccount, selectedChain } = (thunkAPI.getState() as RootState).signUp;
 
   const gnonative = thunkAPI.extra.gnonative as GnoNativeApi;
@@ -161,7 +162,7 @@ export const signUp = createAsyncThunk<SignUpResponse, SignUpParam, ThunkExtra>(
       thunkAPI.dispatch(addProgress(`no faucetAddress set for chain "${selectedChain.chainName}"`))
     } else {
       thunkAPI.dispatch(addProgress(`onboarding "${name}"`))
-      await onboard(gnonative, newAccount, selectedChain.faucetAddress);
+      await onboard(gnonative, newAccount, selectedChain.faucetAddress, captcha);
     }
 
     thunkAPI.dispatch(addProgress(`SignUpState.account_created`))
@@ -169,7 +170,7 @@ export const signUp = createAsyncThunk<SignUpResponse, SignUpParam, ThunkExtra>(
   }
 })
 
-export const onboarding = createAsyncThunk<SignUpResponse, { account: KeyInfo }, ThunkExtra>("user/onboarding", async (param, thunkAPI) => {
+export const onboarding = createAsyncThunk<SignUpResponse, { account: KeyInfo, captcha?: string }, ThunkExtra>("user/onboarding", async (param, thunkAPI) => {
   thunkAPI.dispatch(addProgress(`onboarding "${param.account.name}"`))
 
   const { selectedChain } = (thunkAPI.getState() as RootState).signUp;
@@ -178,9 +179,9 @@ export const onboarding = createAsyncThunk<SignUpResponse, { account: KeyInfo },
     throw new Error("No chain selected");
   }
 
-  const { account } = param;
+  const { account, captcha } = param;
   const gnonative = thunkAPI.extra.gnonative as GnoNativeApi;
-  await onboard(gnonative, account, selectedChain.faucetAddress);
+  await onboard(gnonative, account, selectedChain.faucetAddress, captcha);
 
   thunkAPI.dispatch(addProgress(`SignUpState.account_created`))
   return { newAccount: account, state: SignUpState.account_created };
@@ -264,10 +265,10 @@ function convertToJson(result: string | undefined) {
   return json;
 }
 
-const onboard = async (gnonative: GnoNativeApi, account: KeyInfo, faucetRemote?: string) => {
+const onboard = async (gnonative: GnoNativeApi, account: KeyInfo, faucetRemote?: string, captcha?: string) => {
   const { name, address } = account
   const address_bech32 = await gnonative.addressToBech32(address);
-  console.log("onboarding %s, with address: %s", name, address_bech32);
+  console.log("onboard %s, with address: %s", name, address_bech32);
 
   try {
     const hasBalance = await hasCoins(gnonative, address);
@@ -279,7 +280,7 @@ const onboard = async (gnonative: GnoNativeApi, account: KeyInfo, faucetRemote?:
     }
 
     if (faucetRemote) {
-      const response = await sendCoins(address_bech32, faucetRemote);
+      const response = await sendCoins(address_bech32, faucetRemote, captcha);
       console.log("coins sent, response: %s", response);
       await registerAccount(gnonative, account);
     } else {
@@ -326,13 +327,18 @@ const hasCoins = async (gnonative: GnoNativeApi, address: Uint8Array) => {
   }
 };
 
-const sendCoins = async (address: string, faucetRemote: string) => {
+const sendCoins = async (address: string, faucetRemote: string, captcha?: string) => {
   const myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/json");
 
   const raw = JSON.stringify({
     To: address,
+    captcha,
+    amount: 1 * 1000000 + 'ugnot'
   });
+
+  console.log("sending coins to %s", address);
+  console.log("raw", raw);
 
   const requestOptions = {
     method: "POST",
@@ -393,7 +399,7 @@ export const signUpSlice = createSlice({
       state.existingAccount = action.payload?.existingAccount;
       state.signUpState = action.payload?.state;
     }).addCase(initSignUpState.fulfilled, (state, action) => {
-      console.log("initSignUpState.fulfilled nnnnnn", action.payload);
+      console.log("initSignUpState.fulfilled", action.payload);
       state.phrase = action.payload.phrase;
       state.loading = false;
       state.newAccount = undefined;
@@ -420,7 +426,7 @@ export const signUpSlice = createSlice({
 
 export const selectChainsAvailable = createSelector(
   (state: RootState) => state.signUp.customChains,
-  (customChains) => customChains ? chains.concat(customChains) : chains
+  (customChains) => customChains ? (chains as NetworkMetainfo[]).concat(customChains) : chains
 );
 
 export const { addProgress, signUpState, clearProgress, addCustomChain, setRegisterAccount, setKeyName,
