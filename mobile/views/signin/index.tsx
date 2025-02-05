@@ -1,7 +1,7 @@
 import Alert from "@/components/alert";
-import Button from "@/components/button";
 import Spacer from "@/components/spacer";
 import TextInput from "@/components/textinput";
+import { Button, TextField } from "@/modules/ui-components";
 import { useRef, useState } from "react";
 import { TextInput as RNTextInput } from "react-native";
 
@@ -17,6 +17,7 @@ const SignInView: React.FC<Props> = ({ onUnlokPress, error }) => {
 
   return (
     <>
+    <TextField placeholder={`Master password`} secureTextEntry={true} onChangeText={setPassword} />
       <TextInput
         ref={inputRef}
         placeholder={`Master password`}
@@ -26,7 +27,7 @@ const SignInView: React.FC<Props> = ({ onUnlokPress, error }) => {
       />
       <Alert severity="error" message={error} />
       <Spacer space={8} />
-      <Button.TouchableOpacity title="Unlock" onPress={() => onUnlokPress(password)} variant="primary" />
+      <Button onPress={() => onUnlokPress(password)} color="primary">Unlock</Button>
     </>
   );
 }

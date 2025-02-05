@@ -7,6 +7,7 @@ import { getInitialState, selectAction, selectInitialized, selectMasterPassword,
 import * as Application from "expo-application";
 import SignInView from "@/views/signin";
 import SignUpView from "@/views/signup";
+import { Container } from "@/modules/ui-components";
 
 export default function Root() {
   const route = useRouter();
@@ -69,7 +70,7 @@ export default function Root() {
   }
 
   return (
-    <>
+    <Container>
       <Layout.Container>
         <Layout.BodyAlignedBotton>
           <View style={{ alignItems: "center" }}>
@@ -87,6 +88,6 @@ export default function Root() {
           </KeyboardAvoidingView>
         </Layout.BodyAlignedBotton>
       </Layout.Container>
-    </>
+    </Container>
   );
 }
