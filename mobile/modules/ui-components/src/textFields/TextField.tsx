@@ -27,11 +27,10 @@ export const TextField: React.FC<Props> = ({ type = 'text', ...rest }) => {
 const Container = styled.View<Props>`
 	flex-direction: row;
 	align-items: center;
-	border-width: 1px;
-	border-radius: 4px;
 	padding: 2px;
-	margin: 10px 0;
 	border-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.black};
+	border-width: 1px;
+	border-radius: ${({ theme }: { theme: DefaultTheme }) => theme.borderRadius-12}px;
 	color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.black};
 	background-color: ${({ theme }: { theme: DefaultTheme }) => theme.textinputs?.background};
 `

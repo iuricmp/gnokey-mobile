@@ -2,12 +2,11 @@ import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Layout } from "@/components/index";
-import Text from "@/components/text";
 import { getInitialState, selectAction, selectInitialized, selectMasterPassword, changeMasterPass, useAppDispatch, useAppSelector, createMasterPass } from "@/redux";
 import * as Application from "expo-application";
 import SignInView from "@/views/signin";
 import SignUpView from "@/views/signup";
-import { Container } from "@/modules/ui-components";
+import { Container, Text } from "@/modules/ui-components";
 
 export default function Root() {
   const route = useRouter();
@@ -63,7 +62,7 @@ export default function Root() {
       // TODO: avoid flickering
       <Layout.Container>
         <Layout.Body style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text.BodyMedium>Loading App...</Text.BodyMedium>
+          <Text.Body>Loading App...</Text.Body>
         </Layout.Body>
       </Layout.Container>
     );
@@ -74,9 +73,8 @@ export default function Root() {
       <Layout.Container>
         <Layout.BodyAlignedBotton>
           <View style={{ alignItems: "center" }}>
-            <Text.Title>GnoKey Mobile</Text.Title>
+            <Text.H1  style={{textAlign: "center" }} >GnoKey Mobile</Text.H1>
             <Text.Body>The Gno Key Management Tool</Text.Body>
-            <Text.Caption1>Build Version: {appVersion}</Text.Caption1>
           </View>
 
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>

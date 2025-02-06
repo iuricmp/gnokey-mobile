@@ -3,11 +3,12 @@ import { useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { useGnoNativeContext } from "@gnolang/gnonative";
 import { signOut, useAppDispatch } from "@/redux";
-import Button from "@/components/button";
 import { Layout } from "@/components/index";
 import { LoadingModal } from "@/components/loading";
 import Text from "@/components/text";
 import ChangeMasterPassword from "@/views/change-master-password";
+import { AppBar, Button } from "@/modules/ui-components";
+import { FontAwesome6 } from "@expo/vector-icons";
 
 export default function Page() {
   const [loading, setLoading] = useState(false);
@@ -48,6 +49,12 @@ export default function Page() {
   return (
     <>
       <Layout.Container>
+        <AppBar>
+          <View/>
+          <Button onPress={() => navigation.goBack()} color='tertirary' endIcon={<FontAwesome6 name='xmark' size={16} color='black' />}>
+            Cancel
+          </Button>
+        </AppBar>
         <Layout.Body>
           <>
             <Text.Subheadline>Chain ID:</Text.Subheadline>
@@ -57,8 +64,8 @@ export default function Page() {
             <View></View>
           </>
           <Layout.Footer>
-            <Button.TouchableOpacity title="Change master password" onPress={onPressChangePass} style={styles.logout} variant="primary-red" />
-            <Button.TouchableOpacity title="Logout" onPress={onPressLogout} style={styles.logout} variant="primary-red" />
+            <Button onPress={onPressChangePass} style={styles.logout} color="tertirary">Change master password</Button>
+            <Button onPress={onPressLogout} style={styles.logout} color="tertirary">Logout</Button>
           </Layout.Footer>
         </Layout.Body>
       </Layout.Container>

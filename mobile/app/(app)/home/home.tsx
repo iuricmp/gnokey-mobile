@@ -5,11 +5,11 @@ import { Layout } from "@/components/index";
 import Text from "@/components/text";
 import { checkForKeyOnChains, initSignUpState, selectMasterPassword, useAppDispatch, useAppSelector, selectKeyInfoChains } from "@/redux";
 import { KeyInfo, useGnoNativeContext } from "@gnolang/gnonative";
-import Octicons from '@expo/vector-icons/Octicons';
-import TextInput from "@/components/textinput";
-import { colors } from "@/assets/styles/colors";
 import VaultListItem from "@/components/list/vault-list/VaultListItem";
 import { setVaultToEdit } from "@/redux";
+import { AppBar, ButtonIcon, Button, TextField, Spacer } from "@/modules/ui-components";
+import { FontAwesome6 } from "@expo/vector-icons";
+import styled from "styled-components/native";
 
 export default function Page() {
   const route = useRouter();
@@ -79,7 +79,7 @@ export default function Page() {
   }
 
   const getChainNamePerKey = (keyInfo: KeyInfo): string[] | undefined => {
-    if (keyInfoChains instanceof Map &&  keyInfoChains?.has(keyInfo.address.toString())) {
+    if (keyInfoChains instanceof Map && keyInfoChains?.has(keyInfo.address.toString())) {
       return keyInfoChains.get(keyInfo.address.toString())
     }
   }
@@ -97,15 +97,21 @@ export default function Page() {
   return (
     <>
       <Layout.Container>
-        <Layout.BodyAlignedBotton>
-          <View style={{ flexDirection: 'row', alignItems: "center", justifyContent: "space-between", marginHorizontal: 8 }}>
-            <TextInput placeholder="Search Vault" containerStyle={{ width: '86%' }} value={nameSearch} onChangeText={setNameSearch}>
-              <Octicons name="search" size={24} color="gray" />
-            </TextInput>
-            <TouchableOpacity onPress={navigateToAddKey}>
-              <Octicons name="diff-added" size={38} color={colors.primary} />
-            </TouchableOpacity>
-          </View>
+        <AppBar>
+          <ButtonIcon onPress={() => route.push('/home/profile')} size={40} color='tertirary'>
+            <FontAwesome6 name='user' size={20} color='black' />
+          </ButtonIcon>
+
+          <Button onPress={navigateToAddKey} color='tertirary' endIcon={<FontAwesome6 name='add' size={16} color='black' />}>
+            New Vault
+          </Button>
+        </AppBar>
+        <BodyAlignedBotton>
+          <TextField placeholder='Search Vault' value={nameSearch} onChangeText={setNameSearch} autoCapitalize="none" autoCorrect={false} />
+
+          <Spacer />
+          <Text.Body style={{ textAlign: 'center' }} >{filteredAccounts.length} {filteredAccounts.length > 1 ? 'results' : 'result'}</Text.Body>
+          <Spacer />
 
           {filteredAccounts && (
             <FlatList
@@ -118,8 +124,16 @@ export default function Page() {
             />
           )}
           {/* </ScrollView> */}
-        </Layout.BodyAlignedBotton>
+        </BodyAlignedBotton>
       </Layout.Container>
     </>
   );
 }
+
+export const BodyAlignedBotton = styled.View`
+  width: 100%;
+  height: 100%;
+  padding-top: 4px;
+  justify-content: flex-end;
+  padding-bottom: 12px;
+`;

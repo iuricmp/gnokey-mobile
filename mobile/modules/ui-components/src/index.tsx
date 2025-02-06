@@ -4,6 +4,8 @@ import * as Text from './text'
 import { TextField } from './textFields/TextField'
 import { ThemeProvider, DefaultTheme } from './ui/ThemeProvider'
 
+export * from './chip'
+
 export * from './surfaces'
 
 export * from './buttons'

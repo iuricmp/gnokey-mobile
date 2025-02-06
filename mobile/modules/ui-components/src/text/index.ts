@@ -18,10 +18,25 @@ export const H2 = styled.Text`
 `
 export type H2 = typeof H2
 
+export const H3 = styled.Text`
+	font-weight: 400;
+	font-size: 22px;
+	letter-spacing: -0.32px;
+	color: ${(props: DefaultTheme) => props.theme.colors.black};
+`
+export type H3 = typeof H3
+
 export const Body = styled.Text<TextProps>`
 	font-weight: 400;
 	font-size: 16px;
 	letter-spacing: -0.32px;
+	color: ${(props: DefaultTheme) => props.theme.colors.black};
+`
+
+export const Caption = styled.Text<TextProps>`
+	font-weight: 400;
+	font-size: 12px;
+	letter-spacing: 0.8px;
 	color: ${(props: DefaultTheme) => props.theme.colors.black};
 `
 
