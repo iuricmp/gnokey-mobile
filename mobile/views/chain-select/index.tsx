@@ -6,31 +6,30 @@ import { selectChainsAvailable, selectRegisterAccount, selectSelectedChain, setR
 
 const ChainSelectView = () => {
 
-    const isChecked = useAppSelector(selectRegisterAccount)
+  const isChecked = useAppSelector(selectRegisterAccount)
 
-    const router = useRouter();
-    const dispatch = useAppDispatch()
+  const router = useRouter();
+  const dispatch = useAppDispatch()
 
-    const chains = useAppSelector(selectChainsAvailable)
-    const currentNetwork = useAppSelector(selectSelectedChain)
+  const chains = useAppSelector(selectChainsAvailable)
+  const currentNetwork = useAppSelector(selectSelectedChain)
 
-    const currentNetworkMetainfo = chains.filter(x => x.gnoAddress === currentNetwork?.gnoAddress)[0]
+  const currentNetworkMetainfo = chains.filter(x => x.gnoAddress === currentNetwork?.gnoAddress)[0]
 
-    return (
-        <View style={{ borderColor: 'black', borderWidth: 1, borderRadius: 4 }}>
-            <MenuToggle isToggleOn={isChecked} onPress={() => dispatch(setRegisterAccount(!isChecked))} >
-                Register on `r/demo/users` realm:
-            </MenuToggle>
-            <Ruller />
-            {currentNetwork ?
-                <NetworkListItem
-                    disabled={!isChecked}
-                    onPress={() => router.push("/chain-selection")}
-                    networkMetainfo={currentNetworkMetainfo}
-                    currentRemote={currentNetwork.gnoAddress}
-                /> : null}
-        </View>
-    );
+  return (
+    <View >
+      <MenuToggle isToggleOn={isChecked} onPress={() => dispatch(setRegisterAccount(!isChecked))} >
+        Register on `r/demo/users` realm:
+      </MenuToggle>
+      {currentNetwork ?
+        <NetworkListItem
+          disabled={!isChecked}
+          onPress={() => router.push("/chain-selection")}
+          networkMetainfo={currentNetworkMetainfo}
+          currentRemote={currentNetwork.gnoAddress}
+        /> : null}
+    </View>
+  );
 }
 
 export default ChainSelectView;

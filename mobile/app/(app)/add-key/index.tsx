@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView, TextInput as RNTextInput, Alert as RNAlert } from "react-native";
+import { StyleSheet, View, ScrollView, TextInput as RNTextInput, Alert as RNAlert } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { router, useNavigation } from "expo-router";
 import { useGnoNativeContext } from "@gnolang/gnonative";
@@ -16,9 +16,10 @@ import {
   selectPhrase,
 } from "@/redux";
 import { ProgressViewModal, ChainSelectView } from "@/views";
-import { TextCopy, Layout, Alert, Spacer, Button, TextInput } from "@/components";
-import { Octicons } from "@expo/vector-icons";
+import { TextCopy, Layout, Alert, Spacer, TextInput } from "@/components";
+import { FontAwesome6, Octicons } from "@expo/vector-icons";
 import { colors } from "@/assets";
+import { AppBar, Button, Text, TextField } from "@/modules/ui-components";
 
 export default function Page() {
 
@@ -141,15 +142,24 @@ export default function Page() {
 
   return (
     <Layout.Container>
+      <AppBar>
+        <View />
+        <Button onPress={() => navigation.goBack()} color='tertirary' endIcon={<FontAwesome6 name='xmark' size={16} color='black' />}>
+          Cancel
+        </Button>
+      </AppBar>
       <Layout.Body>
         <ScrollView>
-          <View style={styles.main}>
-            <Text style={styles.title}>Create a new Key</Text>
+          <View>
+            <Text.H1>My New</Text.H1>
+            <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
+              <Text.H1>Vault&nbsp;</Text.H1>
+              <Text.H1 style={{ color: 'white' }}>Info</Text.H1>
+            </View>
             <View style={{ minWidth: 200, paddingTop: 8 }}>
               <Spacer />
-              <TextInput
-                ref={inputRef}
-                placeholder="Key name"
+              <TextField
+                placeholder="Vault name"
                 value={keyName}
                 onChangeText={x => dispatch(setKeyName(x))}
                 autoCapitalize="none"
@@ -158,20 +168,23 @@ export default function Page() {
             </View>
             <Spacer />
             <View style={{ minWidth: 200, paddingTop: 8, paddingBottom: 8 }}>
+
+              <ChainSelectView />
+
               <TextCopy text={phrase}>
-                <Text style={{ flexDirection: "row" }}>
+                <Text.Body style={{ flexDirection: "row" }}>
                   <Octicons name="copy" size={12} color={colors.primary} />
-                  <Text > Your seed phrase: </Text>
-                  <Text style={{ fontWeight: 700 }}>{phrase}</Text>
-                </Text>
+                  <Text.Body > Your seed phrase: </Text.Body>
+                  <Text.Body style={{ fontWeight: 700 }}>{phrase}</Text.Body>
+                </Text.Body>
               </TextCopy>
               <Spacer />
-              <ChainSelectView />
+
               <Alert severity="error" message={error} />
               <Spacer />
-              <Button.TouchableOpacity title="Create" onPress={onCreate} variant="primary" loading={loading} />
+              <Button onPress={onCreate} color="primary" loading={loading} >Create</Button>
               <Spacer space={8} />
-              <Button.TouchableOpacity title="Back" onPress={onBack} variant="secondary" disabled={loading} />
+              <Button onPress={onBack} color="secondary" disabled={loading}>Back</Button>
             </View>
           </View>
         </ScrollView>

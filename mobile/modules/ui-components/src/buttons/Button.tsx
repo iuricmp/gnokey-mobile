@@ -10,13 +10,14 @@ export interface Button extends TouchableOpacityProps {
 	startIcon?: React.ReactNode
 	endIcon?: React.ReactNode
 	color?: ButtonColor
+  loading?: boolean
 }
 
 export const Button: React.FC<Button> = props => {
 	const isChildrenString = typeof props.children === 'string'
 
 	return (
-		<ButtonWrapper {...props} $color={props.color} style={[props.style]}>
+		<ButtonWrapper {...props} $color={props.color} style={[props.style]} disabled={props.loading}>
 			{props.startIcon ? <StartIconWrapper>{props.startIcon}</StartIconWrapper> : null}
 			{isChildrenString ? <Text.ButtonLabel $color={props.color}>{props.children}</Text.ButtonLabel> : props.children}
 			{props.endIcon ? <EndIconWrapper>{props.endIcon}</EndIconWrapper> : null}
